@@ -273,7 +273,7 @@ export default function Inicio() {
           variants={itemVariants}
           className="text-base sm:text-xl text-white/60 max-w-2xl mx-auto leading-relaxed font-medium mb-12 px-4"
         >
-          A maior rede colaborativa de combate à fraude de combustíveis no Brasil. Você está sendo prejudicado, não se cale e divulge!
+          A maior rede colaborativa de combate à fraude de combustíveis no Brasil, incluindo dados oficiais da ANP. Você está sendo prejudicado, não se cale e divulge!
         </motion.p>
 
           <motion.form

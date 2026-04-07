@@ -34,6 +34,18 @@ function AnimatedRoutes() {
 }
 
 export default function App() {
+  useEffect(() => {
+    const bloquearCliqueDireito = (evento: MouseEvent) => {
+      evento.preventDefault();
+    };
+
+    window.addEventListener('contextmenu', bloquearCliqueDireito);
+
+    return () => {
+      window.removeEventListener('contextmenu', bloquearCliqueDireito);
+    };
+  }, []);
+
   return (
     <Router>
       <Layout>

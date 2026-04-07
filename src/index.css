@@ -21,6 +21,12 @@
     @apply bg-brand-dark text-white antialiased selection:bg-brand-red selection:text-white;
   }
 
+  /* Bloqueia seleção de texto na aplicação inteira */
+  * {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
   /* Scrollbar global vermelha para manter o visual da plataforma */
   * {
     scrollbar-width: thin;
