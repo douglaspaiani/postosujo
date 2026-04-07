@@ -1,0 +1,90 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-brand-red: #FF1E1E;
+  --color-brand-dark: #050505;
+  --color-brand-surface: #121212;
+  --color-brand-border: rgba(255, 255, 255, 0.1);
+  
+  --animate-spin-slow: spin 3s linear infinite;
+}
+
+@layer base {
+  html, body, #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    @apply bg-brand-dark text-white antialiased selection:bg-brand-red selection:text-white;
+  }
+
+  /* Scrollbar global vermelha para manter o visual da plataforma */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-brand-red) rgba(255, 255, 255, 0.08);
+  }
+
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: var(--color-brand-red);
+    border-radius: 999px;
+    border: 2px solid rgba(0, 0, 0, 0.25);
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: #ff3b3b;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10;
+  }
+  
+  .red-glow {
+    @apply shadow-[0_0_20px_rgba(255,30,30,0.3)];
+  }
+  
+  .red-glow-hover:hover {
+    @apply shadow-[0_0_30px_rgba(255,30,30,0.5)];
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .leaflet-container {
+    width: 100%;
+    height: 100%;
+    background: #050505 !important;
+  }
+
+  /* Oculta qualquer marca/atribuição padrão do Leaflet no canto do mapa */
+  .leaflet-control-attribution {
+    display: none !important;
+  }
+}
+
+.custom-div-icon {
+  background: none !important;
+  border: none !important;
+}
+
+button, a {
+  cursor: pointer;
+}

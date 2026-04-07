@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320">
+  <rect width="320" height="320" rx="56" fill="#CF2027"/>
+  <circle cx="160" cy="140" r="84" fill="#FFFFFF"/>
+  <polygon points="160,84 176,128 224,128 186,156 200,200 160,172 120,200 134,156 96,128 144,128" fill="#1F4E95"/>
+  <text x="160" y="276" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="800" fill="#FFFFFF">TEXACO</text>
+</svg>

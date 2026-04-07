@@ -1,0 +1,25 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Denuncia {
+  id           String   @id @db.VarChar(64)
+  nome         String   @db.VarChar(255)
+  endereco     String   @db.Text
+  cidade       String   @db.VarChar(255)
+  lat          Float
+  lng          Float
+  descricao    String   @db.Text
+  dataDenuncia DateTime
+  bandeira     String?  @db.VarChar(64)
+  foto         String?  @db.Text
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  @@map("denuncias")
+}

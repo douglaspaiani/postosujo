@@ -1,0 +1,5 @@
+{
+  "name": "PostoSujo - Denúncia de Gasolina Adulterada",
+  "description": "Aplicativo para mapear e denunciar postos com combustível adulterado no Brasil.",
+  "requestFramePermissions": ["geolocation"]
+}

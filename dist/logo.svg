@@ -1,0 +1,24 @@
+<svg width="400" height="120" viewBox="0 0 400 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle/Icon Area -->
+  <circle cx="50" cy="50" r="45" fill="#FF1E1E" fill-opacity="0.2"/>
+  <circle cx="50" cy="50" r="35" stroke="#FF1E1E" stroke-width="4"/>
+  
+  <!-- Gas Pump Icon (Simplified) -->
+  <rect x="40" y="35" width="20" height="30" rx="2" fill="white"/>
+  <rect x="43" y="38" width="14" height="10" fill="#1A1A1A"/>
+  <path d="M60 45H65V55H60" stroke="white" stroke-width="2"/>
+  
+  <!-- Warning Triangle -->
+  <path d="M75 65L85 45L95 65H75Z" fill="#FF1E1E"/>
+  <text x="83" y="62" fill="white" font-family="Arial" font-size="12" font-weight="bold">!</text>
+
+  <!-- Main Text -->
+  <text x="110" y="65" fill="white" font-family="Inter, sans-serif" font-size="48" font-weight="900" font-style="italic" letter-spacing="-2">
+    POSTO<tspan fill="#FF1E1E">SUJO</tspan>
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="112" y="85" fill="white" fill-opacity="0.6" font-family="Inter, sans-serif" font-size="10" font-weight="900" letter-spacing="2">
+    PLATAFORMA DE DENÚNCIAS
+  </text>
+</svg>

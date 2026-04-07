@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320">
+  <rect width="320" height="320" rx="56" fill="#111827"/>
+  <rect x="24" y="24" width="272" height="272" rx="42" fill="#FFFFFF"/>
+  <circle cx="160" cy="134" r="62" fill="#E5E7EB"/>
+  <path d="M134 110h52v50c0 17-14 30-30 30h-22z" fill="#9CA3AF"/>
+  <path d="M184 120h14c10 0 18 8 18 18v26h-14v-22c0-5-3-8-8-8h-10z" fill="#6B7280"/>
+  <text x="160" y="266" text-anchor="middle" font-family="Arial, sans-serif" font-size="34" font-weight="800" fill="#111827">BANDEIRA BRANCA</text>
+</svg>

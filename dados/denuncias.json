@@ -1,0 +1,35 @@
+[
+  {
+    "id": "1",
+    "nome": "Posto Central",
+    "endereco": "Av. Paulista, 1000",
+    "cidade": "São Paulo",
+    "lat": -23.5614,
+    "lng": -46.6559,
+    "descricao": "Gasolina com cheiro forte de solvente.",
+    "dataDenuncia": "2024-03-20",
+    "bandeira": "petrobras"
+  },
+  {
+    "id": "2",
+    "nome": "Posto do Trevo",
+    "endereco": "Rodovia BR-116, Km 20",
+    "cidade": "Curitiba",
+    "lat": -25.429,
+    "lng": -49.2671,
+    "descricao": "Carro começou a falhar logo após o abastecimento.",
+    "dataDenuncia": "2024-03-22",
+    "bandeira": "shell"
+  },
+  {
+    "id": "3",
+    "nome": "Posto Ipiranga de Teste",
+    "endereco": "Rua Portão, 123",
+    "cidade": "Estância Velha",
+    "lat": -29.6489,
+    "lng": -51.1764,
+    "descricao": "Teste de denúncia em Estância Velha.",
+    "dataDenuncia": "2024-04-05",
+    "bandeira": "ipiranga"
+  }
+]

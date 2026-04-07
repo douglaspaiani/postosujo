@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320">
+  <rect width="320" height="320" rx="56" fill="#263238"/>
+  <circle cx="160" cy="140" r="84" fill="#ECEFF1"/>
+  <path d="M94 156c28-38 78-54 126-38-24-2-44 10-54 28 20-8 44-2 58 16-30 30-87 32-130 4 0-4 0-8 0-10z" fill="#455A64"/>
+  <text x="160" y="276" text-anchor="middle" font-family="Arial, sans-serif" font-size="44" font-weight="800" fill="#ECEFF1">RODOIL</text>
+</svg>
