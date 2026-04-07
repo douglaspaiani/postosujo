@@ -85,18 +85,10 @@ export default function Layout({ children }: LayoutProps) {
 
       <footer className="relative z-[90] px-4 pb-20 text-center">
         <p className="text-xs sm:text-sm text-white/60 font-medium">
-          Plataforma sem fins lucativos. Divulge!
+          Plataforma gratuita e sem fins lucativos. Divulge!
         </p>
         <p className="text-xs sm:text-sm text-white/40 mt-1">
-          Desenvolvido por{' '}
-          <a
-            href="https://douglaspaiani.com.br"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-brand-red font-bold hover:text-red-400 transition-colors"
-          >
-            Douglas Paiani
-          </a>
+          Seu posto está nesse site? Melhore sua qualidade e saia do "Serasa dos Postos".
         </p>
       </footer>
 

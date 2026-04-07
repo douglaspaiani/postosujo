@@ -6,6 +6,7 @@ import { PostoAgrupado } from '../types';
 import { calculateDistance } from '../lib/geo';
 import { listarPostosAgrupados } from '../lib/apiDenuncias';
 import { logosBandeiras } from '../lib/bandeiras';
+import logoOutros from '../assets/bandeiras/outro.png';
 
 interface ResultadoBusca {
   display_name: string;
@@ -20,6 +21,7 @@ interface ResultadoBusca {
 }
 
 const RAIO_CIDADES_VIZINHAS_KM = 50;
+const ITENS_POR_PAGINA_DENUNCIAS = 9;
 
 export default function Inicio() {
   const secaoMapaRef = useRef<HTMLElement>(null);
@@ -36,6 +38,7 @@ export default function Inicio() {
   const [localUsuario, setLocalUsuario] = useState<[number, number] | null>(null);
   const [postoSelecionadoId, setPostoSelecionadoId] = useState<string | null>(null);
   const [postoModal, setPostoModal] = useState<PostoAgrupado | null>(null);
+  const [paginaAtual, setPaginaAtual] = useState(1);
 
   useEffect(() => {
     const carregarPostos = async () => {
@@ -186,6 +189,24 @@ export default function Inicio() {
     return filtrados;
   }, [postos, busca, localUsuario, filtroCidadeVizinha]);
 
+  const totalPaginas = Math.max(1, Math.ceil(postosFiltrados.length / ITENS_POR_PAGINA_DENUNCIAS));
+
+  const postosPaginados = useMemo(() => {
+    const inicio = (paginaAtual - 1) * ITENS_POR_PAGINA_DENUNCIAS;
+    const fim = inicio + ITENS_POR_PAGINA_DENUNCIAS;
+    return postosFiltrados.slice(inicio, fim);
+  }, [postosFiltrados, paginaAtual]);
+
+  useEffect(() => {
+    setPaginaAtual(1);
+  }, [busca, filtroCidadeVizinha]);
+
+  useEffect(() => {
+    if (paginaAtual > totalPaginas) {
+      setPaginaAtual(totalPaginas);
+    }
+  }, [paginaAtual, totalPaginas]);
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -206,6 +227,14 @@ export default function Inicio() {
     setZoomMapa(16);
     setPostoSelecionadoId(posto.idPosto);
     secaoMapaRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const obterLogoBandeira = (bandeira?: string) => {
+    const bandeiraNormalizada = (bandeira || '').toLowerCase().trim();
+    if (!bandeiraNormalizada || bandeiraNormalizada === 'outros') {
+      return logoOutros;
+    }
+    return logosBandeiras[bandeiraNormalizada as keyof typeof logosBandeiras] || null;
   };
 
   return (
@@ -244,7 +273,7 @@ export default function Inicio() {
           variants={itemVariants}
           className="text-base sm:text-xl text-white/60 max-w-2xl mx-auto leading-relaxed font-medium mb-12 px-4"
         >
-          A maior rede colaborativa de combate à fraude de combustíveis no Brasil.
+          A maior rede colaborativa de combate à fraude de combustíveis no Brasil. Você está sendo prejudicado, não se cale e divulge!
         </motion.p>
 
           <motion.form
@@ -344,7 +373,7 @@ export default function Inicio() {
             <div className="space-y-4">
               <div className="inline-flex items-center gap-2 text-brand-red text-xs font-black uppercase tracking-[0.3em]">
                 <Radar className="w-4 h-4" />
-                Feed de Ocorrências
+                Feed de Ocorrências 2025-2026
               </div>
               <h2 className="text-4xl sm:text-6xl font-black text-white tracking-tighter uppercase italic">
                 Denúncias <span className="text-brand-red">Recentes</span>
@@ -372,20 +401,21 @@ export default function Inicio() {
               <p className="text-white/40 font-medium">Buscando dados da API.</p>
             </div>
           ) : postosFiltrados.length > 0 ? (
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-            >
-              {postosFiltrados.map((posto) => (
-                <motion.div
-                  key={posto.idPosto}
-                  variants={itemVariants}
-                  whileHover={{ y: -5 }}
-                  className="group relative bg-brand-surface border border-white/5 rounded-[2rem] overflow-hidden hover:border-brand-red/30 transition-all duration-500"
-                >
+            <>
+              <motion.div
+                variants={containerVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              >
+                {postosPaginados.map((posto) => (
+                  <motion.div
+                    key={posto.idPosto}
+                    variants={itemVariants}
+                    whileHover={{ y: -5 }}
+                    className="group relative bg-brand-surface border border-white/5 rounded-[2rem] overflow-hidden hover:border-brand-red/30 transition-all duration-500"
+                  >
                   <div className="aspect-[16/5] relative overflow-hidden">
                     {posto.foto ? (
                       <img
@@ -396,9 +426,9 @@ export default function Inicio() {
                       />
                     ) : (
                       <div className="w-full h-full bg-brand-dark flex items-center justify-center">
-                        {posto.bandeira && logosBandeiras[posto.bandeira as keyof typeof logosBandeiras] ? (
+                        {obterLogoBandeira(posto.bandeira) ? (
                           <img
-                            src={logosBandeiras[posto.bandeira as keyof typeof logosBandeiras]}
+                            src={obterLogoBandeira(posto.bandeira) || undefined}
                             alt={`Fundo ${posto.bandeira}`}
                             className="w-24 h-24 object-contain opacity-25 group-hover:opacity-35 transition-opacity"
                           />
@@ -408,10 +438,10 @@ export default function Inicio() {
                     <div className="absolute inset-0 bg-gradient-to-t from-brand-surface via-transparent to-transparent" />
 
                     <div className="absolute top-4 left-4">
-                      {posto.bandeira && logosBandeiras[posto.bandeira as keyof typeof logosBandeiras] ? (
+                      {obterLogoBandeira(posto.bandeira) ? (
                         <div className="bg-brand-red/90 text-white px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-widest shadow-xl flex items-center gap-1.5">
                           <img
-                            src={logosBandeiras[posto.bandeira as keyof typeof logosBandeiras]}
+                            src={obterLogoBandeira(posto.bandeira) || undefined}
                             alt={`Logo ${posto.bandeira}`}
                             className="w-4 h-4 rounded-full bg-white object-contain p-[1px]"
                           />
@@ -466,9 +496,34 @@ export default function Inicio() {
                       </div>
                     </div>
                   </div>
-                </motion.div>
-              ))}
-            </motion.div>
+                  </motion.div>
+                ))}
+              </motion.div>
+
+              {postosFiltrados.length > ITENS_POR_PAGINA_DENUNCIAS && (
+                <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6">
+                  <button
+                    onClick={() => setPaginaAtual((anterior) => Math.max(1, anterior - 1))}
+                    disabled={paginaAtual === 1}
+                    className="px-4 py-2 rounded-xl border border-white/10 bg-white/5 text-xs font-black uppercase tracking-widest text-white/70 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Anterior
+                  </button>
+
+                  <p className="text-[11px] text-white/50 font-black uppercase tracking-widest">
+                    Página {paginaAtual} de {totalPaginas}
+                  </p>
+
+                  <button
+                    onClick={() => setPaginaAtual((anterior) => Math.min(totalPaginas, anterior + 1))}
+                    disabled={paginaAtual === totalPaginas}
+                    className="px-4 py-2 rounded-xl border border-brand-red/40 bg-brand-red/10 text-xs font-black uppercase tracking-widest text-brand-red hover:bg-brand-red hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Próxima
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
             <div className="text-center py-24 glass-panel rounded-[3rem]">
               <div className="bg-brand-red/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 border border-brand-red/20">

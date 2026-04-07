@@ -111,7 +111,6 @@ export default function Denunciar() {
     else if (lowerName.includes('ale')) detectedBandeira = 'ale';
     else if (lowerName.includes('rodoil')) detectedBandeira = 'rodoil';
     else if (lowerName.includes('texaco')) detectedBandeira = 'texaco';
-    else if (lowerName.includes('vibra')) detectedBandeira = 'vibra';
     else if (lowerName.includes('posto sim') || /\bsim\b/.test(lowerName)) detectedBandeira = 'sim';
 
     setFormData({
@@ -463,7 +462,6 @@ export default function Denunciar() {
                               { id: 'rodoil', name: 'Rodoil', logo: logosBandeiras.rodoil },
                               { id: 'texaco', name: 'Texaco', logo: logosBandeiras.texaco },
                               { id: 'sim', name: 'Posto SIM', logo: logosBandeiras.sim },
-                              { id: 'vibra', name: 'Vibra', logo: logosBandeiras.vibra },
                               { id: 'branca', name: 'B. Branca', logo: logosBandeiras.branca },
                               { id: 'outros', name: 'Outros', logo: null }
                             ].map((brand) => (

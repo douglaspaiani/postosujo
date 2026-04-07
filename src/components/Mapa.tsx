@@ -26,8 +26,36 @@ const RedIcon = L.icon({
   shadowSize: [41, 41]
 });
 
-const getIcon = (bandeira?: string) => {
-  if (!bandeira || !logosBandeiras[bandeira as keyof typeof logosBandeiras]) return RedIcon;
+function normalizarBandeiraPosto(bandeira?: string) {
+  return (bandeira || '').trim().toLowerCase();
+}
+
+function inferirBandeiraPeloNome(nomePosto?: string) {
+  if (!nomePosto) return null;
+
+  // Inferência para preservar o visual anterior quando a API salva "outros".
+  const nomeNormalizado = nomePosto.toLowerCase();
+  if (nomeNormalizado.includes('ipiranga')) return 'ipiranga';
+  if (nomeNormalizado.includes('petrobras') || nomeNormalizado.includes('br distribuidora') || /\bposto br\b/.test(nomeNormalizado)) return 'petrobras';
+  if (nomeNormalizado.includes('shell')) return 'shell';
+  if (nomeNormalizado.includes('ale')) return 'ale';
+  if (nomeNormalizado.includes('rodoil')) return 'rodoil';
+  if (nomeNormalizado.includes('texaco')) return 'texaco';
+  if (nomeNormalizado.includes('vibra')) return 'vibra';
+  if (nomeNormalizado.includes('potencial')) return 'potencial';
+  if (nomeNormalizado.includes('santa lucia') || nomeNormalizado.includes('santa lúcia')) return 'santa_lucia';
+  if (/\bposto sim\b/.test(nomeNormalizado) || /\bsim\b/.test(nomeNormalizado)) return 'sim';
+  return null;
+}
+
+const getIcon = (bandeira?: string, nomePosto?: string) => {
+  const bandeiraNormalizada = normalizarBandeiraPosto(bandeira);
+  const chaveBandeira = (
+    (bandeiraNormalizada && bandeiraNormalizada !== 'outros' ? bandeiraNormalizada : null) ||
+    inferirBandeiraPeloNome(nomePosto)
+  );
+
+  if (!chaveBandeira || !logosBandeiras[chaveBandeira as keyof typeof logosBandeiras]) return RedIcon;
   
   // Create a custom div icon to show the logo inside a pin-like shape
   return L.divIcon({
@@ -35,7 +63,7 @@ const getIcon = (bandeira?: string) => {
     html: `
       <div class="relative flex flex-col items-center">
         <div class="w-10 h-10 bg-white rounded-full border-2 border-red-600 shadow-lg flex items-center justify-center overflow-hidden p-1">
-          <img src="${logosBandeiras[bandeira as keyof typeof logosBandeiras]}" class="w-full h-full object-contain" />
+          <img src="${logosBandeiras[chaveBandeira as keyof typeof logosBandeiras]}" class="w-full h-full object-contain" />
         </div>
         <div class="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-red-600 -mt-1 shadow-sm"></div>
       </div>
@@ -235,7 +263,7 @@ function MarkerWithPopup({
   return (
     <Marker 
       position={[posto.lat, posto.lng]} 
-      icon={getIcon(posto.bandeira)}
+      icon={getIcon(posto.bandeira, posto.nome)}
       ref={markerRef}
     >
       <Popup>

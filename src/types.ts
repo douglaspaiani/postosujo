@@ -6,8 +6,9 @@ export type BandeiraPosto =
   | 'rodoil'
   | 'texaco'
   | 'sim'
-  | 'vibra'
   | 'branca'
+  | 'potencial'
+  | 'santa_lucia'
   | 'outros';
 
 export interface Denuncia {

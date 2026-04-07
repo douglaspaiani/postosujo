@@ -1,12 +1,13 @@
 import logoIpiranga from '../assets/bandeiras/ipiranga.png';
-import logoPetrobras from '../assets/bandeiras/petrobras.svg';
-import logoShell from '../assets/bandeiras/shell.svg';
-import logoAle from '../assets/bandeiras/ale.svg';
-import logoRodoil from '../assets/bandeiras/rodoil.svg';
-import logoTexaco from '../assets/bandeiras/texaco.svg';
-import logoSim from '../assets/bandeiras/sim.svg';
-import logoVibra from '../assets/bandeiras/vibra.svg';
-import logoBranca from '../assets/bandeiras/branca.svg';
+import logoPetrobras from '../assets/bandeiras/petrobras.png';
+import logoShell from '../assets/bandeiras/shell.png';
+import logoAle from '../assets/bandeiras/ale.png';
+import logoRodoil from '../assets/bandeiras/rodoil.png';
+import logoTexaco from '../assets/bandeiras/texaco.png';
+import logoSim from '../assets/bandeiras/sim.png'; 
+import logoBranca from '../assets/bandeiras/branca.png';
+import logoPotencial from '../assets/bandeiras/potencial.webp';
+import logoSantaLucia from '../assets/bandeiras/santa_lucia.webp';
 
 export const logosBandeiras = {
   ipiranga: logoIpiranga,
@@ -16,6 +17,7 @@ export const logosBandeiras = {
   rodoil: logoRodoil,
   texaco: logoTexaco,
   sim: logoSim,
-  vibra: logoVibra,
-  branca: logoBranca
+  branca: logoBranca,
+  potencial: logoPotencial,
+  santa_lucia: logoSantaLucia
 };
