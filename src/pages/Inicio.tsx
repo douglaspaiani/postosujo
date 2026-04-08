@@ -341,10 +341,10 @@ export default function Inicio() {
           ) : postosFiltrados.length > 0 ? (
             <>
               <motion.div
+                key={`pagina-${paginaAtual}`}
                 variants={containerVariants}
                 initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
+                animate="visible"
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
               >
                 {postosPaginados.map((posto) => (
@@ -441,6 +441,7 @@ export default function Inicio() {
               {postosFiltrados.length > ITENS_POR_PAGINA_DENUNCIAS && (
                 <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6">
                   <button
+                    type="button"
                     onClick={() => setPaginaAtual((anterior) => Math.max(1, anterior - 1))}
                     disabled={paginaAtual === 1}
                     className="px-4 py-2 rounded-xl border border-white/10 bg-white/5 text-xs font-black uppercase tracking-widest text-white/70 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
@@ -453,6 +454,7 @@ export default function Inicio() {
                   </p>
 
                   <button
+                    type="button"
                     onClick={() => setPaginaAtual((anterior) => Math.min(totalPaginas, anterior + 1))}
                     disabled={paginaAtual === totalPaginas}
                     className="px-4 py-2 rounded-xl border border-brand-red/40 bg-brand-red/10 text-xs font-black uppercase tracking-widest text-brand-red hover:bg-brand-red hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
