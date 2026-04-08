@@ -477,80 +477,6 @@ export default function Mapa({
               <div className="w-2 h-2 bg-brand-red rounded-full animate-ping" />
               <span className="text-xs sm:text-sm font-black uppercase tracking-widest text-white italic">Radar em Tempo Real</span>
             </div>
-
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => {
-                  const proximoEstado = !buscaExpandida;
-                  setBuscaExpandida(proximoEstado);
-                  if (!proximoEstado) aoAlterarExibicaoSugestoes?.(false);
-                }}
-                className="h-12 w-12 rounded-2xl bg-brand-red text-white shadow-2xl hover:bg-red-500 active:scale-95 transition-all flex items-center justify-center"
-                title="Buscar cidade ou posto"
-              >
-                <Search className="w-5 h-5" />
-              </button>
-
-              {buscaExpandida && (
-                <form
-                  onSubmit={(evento) => {
-                    evento.preventDefault();
-                    aoEnviarBuscaMapa?.();
-                  }}
-                  className="absolute top-0 left-14 w-[min(80vw,360px)]"
-                >
-                  <div className="relative">
-                    <input
-                      type="text"
-                      placeholder="Cidade ou posto"
-                      value={buscaMapa}
-                      onChange={(evento) => {
-                        aoMudarBuscaMapa?.(evento.target.value);
-                        aoAlterarExibicaoSugestoes?.(true);
-                      }}
-                      onFocus={() => aoAlterarExibicaoSugestoes?.(true)}
-                      onBlur={() => {
-                        setTimeout(() => aoAlterarExibicaoSugestoes?.(false), 120);
-                      }}
-                      className="w-full h-12 pl-4 pr-12 rounded-2xl bg-brand-surface/95 border border-white/20 text-white placeholder:text-white/40 outline-none focus:border-brand-red"
-                    />
-                    <button
-                      type="submit"
-                      className="absolute right-1 top-1 h-10 w-10 rounded-xl bg-brand-red text-white hover:bg-red-500 transition-colors flex items-center justify-center"
-                    >
-                      <Search className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  {exibirSugestoes && buscaMapa.trim().length >= 2 && (
-                    <div className="mt-2 bg-brand-surface/95 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-xl text-left shadow-2xl">
-                      {carregandoSugestoes ? (
-                        <p className="px-4 py-3 text-xs text-white/60 font-bold uppercase tracking-wider">Buscando...</p>
-                      ) : resultadosBusca.length > 0 ? (
-                        resultadosBusca.map((resultado, indice) => (
-                          <button
-                            key={`${resultado.display_name}-${indice}`}
-                            type="button"
-                            onMouseDown={(evento) => {
-                              evento.preventDefault();
-                              aoSelecionarResultadoBusca?.(resultado);
-                              setBuscaExpandida(false);
-                            }}
-                            className="w-full px-4 py-3 border-b last:border-b-0 border-white/5 hover:bg-white/5 transition-colors"
-                          >
-                            <p className="text-sm font-bold text-white line-clamp-1">{resultado.display_name.split(',')[0]}</p>
-                            <p className="text-[11px] text-white/40 line-clamp-1">{resultado.display_name}</p>
-                          </button>
-                        ))
-                      ) : (
-                        <p className="px-4 py-3 text-xs text-white/50 font-bold uppercase tracking-wider">Nenhuma sugestão encontrada.</p>
-                      )}
-                    </div>
-                  )}
-                </form>
-              )}
-            </div>
           </div>
 
           <button 
@@ -572,6 +498,84 @@ export default function Mapa({
             <p className="text-lg sm:text-xl font-black text-brand-red leading-none mt-1">
               {totalDenunciasNaRegiao}
             </p>
+          </div>
+        </div>
+      )}
+
+      {isFullscreen && (
+        <div className="absolute bottom-6 left-4 sm:left-6 z-[100001] pointer-events-none">
+          <div className="relative pointer-events-auto">
+            <button
+              type="button"
+              onClick={() => {
+                const proximoEstado = !buscaExpandida;
+                setBuscaExpandida(proximoEstado);
+                if (!proximoEstado) aoAlterarExibicaoSugestoes?.(false);
+              }}
+              className="h-12 w-12 rounded-2xl bg-brand-red text-white shadow-2xl hover:bg-red-500 active:scale-95 transition-all flex items-center justify-center"
+              title="Buscar cidade ou posto"
+            >
+              <Search className="w-5 h-5" />
+            </button>
+
+            {buscaExpandida && (
+              <form
+                onSubmit={(evento) => {
+                  evento.preventDefault();
+                  aoEnviarBuscaMapa?.();
+                }}
+                className="absolute bottom-0 left-14 w-[min(80vw,360px)]"
+              >
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Cidade ou posto"
+                    value={buscaMapa}
+                    onChange={(evento) => {
+                      aoMudarBuscaMapa?.(evento.target.value);
+                      aoAlterarExibicaoSugestoes?.(true);
+                    }}
+                    onFocus={() => aoAlterarExibicaoSugestoes?.(true)}
+                    onBlur={() => {
+                      setTimeout(() => aoAlterarExibicaoSugestoes?.(false), 120);
+                    }}
+                    className="w-full h-12 pl-4 pr-12 rounded-2xl bg-brand-surface/95 border border-white/20 text-white placeholder:text-white/40 outline-none focus:border-brand-red"
+                  />
+                  <button
+                    type="submit"
+                    className="absolute right-1 top-1 h-10 w-10 rounded-xl bg-brand-red text-white hover:bg-red-500 transition-colors flex items-center justify-center"
+                  >
+                    <Search className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {exibirSugestoes && buscaMapa.trim().length >= 2 && (
+                  <div className="absolute left-0 right-0 bottom-[calc(100%+8px)] bg-brand-surface/95 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-xl text-left shadow-2xl">
+                    {carregandoSugestoes ? (
+                      <p className="px-4 py-3 text-xs text-white/60 font-bold uppercase tracking-wider">Buscando...</p>
+                    ) : resultadosBusca.length > 0 ? (
+                      resultadosBusca.map((resultado, indice) => (
+                        <button
+                          key={`${resultado.display_name}-${indice}`}
+                          type="button"
+                          onMouseDown={(evento) => {
+                            evento.preventDefault();
+                            aoSelecionarResultadoBusca?.(resultado);
+                            setBuscaExpandida(false);
+                          }}
+                          className="w-full px-4 py-3 border-b last:border-b-0 border-white/5 hover:bg-white/5 transition-colors"
+                        >
+                          <p className="text-sm font-bold text-white line-clamp-1">{resultado.display_name.split(',')[0]}</p>
+                          <p className="text-[11px] text-white/40 line-clamp-1">{resultado.display_name}</p>
+                        </button>
+                      ))
+                    ) : (
+                      <p className="px-4 py-3 text-xs text-white/50 font-bold uppercase tracking-wider">Nenhuma sugestão encontrada.</p>
+                    )}
+                  </div>
+                )}
+              </form>
+            )}
           </div>
         </div>
       )}
@@ -609,54 +613,56 @@ export default function Mapa({
         ))}
       </MapContainer>
 
-      {postoModalDenuncias && (
-        <div
-          className="absolute inset-0 z-[400000] bg-black/70 backdrop-blur-sm p-4 flex items-center justify-center"
-          onClick={fecharModalOutrasDenuncias}
-        >
-          <div
-            className="w-full max-w-2xl max-h-[85vh] overflow-hidden rounded-3xl bg-brand-surface border border-white/10"
-            onClick={(evento) => evento.stopPropagation()}
-          >
-            <div className="flex items-center justify-between p-5 border-b border-white/10">
-              <div>
-                <h3 className="text-lg sm:text-2xl font-black text-white uppercase italic leading-tight">
-                  {postoModalDenuncias.nome}
-                </h3>
-                <p className="text-[10px] sm:text-xs text-white/40 font-bold uppercase tracking-widest">
-                  {postoModalDenuncias.totalDenuncias} denúncias registradas
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={fecharModalOutrasDenuncias}
-                className="p-2 rounded-xl bg-white/5 text-white/70 hover:text-white hover:bg-white/10"
-                aria-label="Fechar modal de denúncias"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-5 overflow-y-auto max-h-[calc(85vh-92px)] space-y-3">
-              {postoModalDenuncias.denuncias.map((denuncia) => (
-                <div key={denuncia.id} className="bg-brand-dark/60 border border-white/10 rounded-2xl p-4 space-y-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-[10px] uppercase tracking-widest text-brand-red font-black">
-                      {denuncia.bandeira || 'Sem bandeira'}
-                    </span>
-                    <span className="text-[10px] text-white/50 font-bold uppercase tracking-widest">
-                      {new Date(denuncia.dataDenuncia).toLocaleDateString('pt-BR')}
-                    </span>
-                  </div>
-                  <p className="text-sm text-white/70 leading-relaxed">{denuncia.descricao}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
+
+  const modalDenunciasPortal = postoModalDenuncias ? createPortal(
+    <div
+      className="fixed inset-0 z-[500000] bg-black/70 backdrop-blur-sm p-4 flex items-center justify-center"
+      onClick={fecharModalOutrasDenuncias}
+    >
+      <div
+        className="w-full max-w-2xl max-h-[85vh] overflow-hidden rounded-3xl bg-brand-surface border border-white/10"
+        onClick={(evento) => evento.stopPropagation()}
+      >
+        <div className="flex items-center justify-between p-5 border-b border-white/10">
+          <div>
+            <h3 className="text-lg sm:text-2xl font-black text-white uppercase italic leading-tight">
+              {postoModalDenuncias.nome}
+            </h3>
+            <p className="text-[10px] sm:text-xs text-white/40 font-bold uppercase tracking-widest">
+              {postoModalDenuncias.totalDenuncias} denúncias registradas
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={fecharModalOutrasDenuncias}
+            className="p-2 rounded-xl bg-white/5 text-white/70 hover:text-white hover:bg-white/10"
+            aria-label="Fechar modal de denúncias"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="p-5 overflow-y-auto max-h-[calc(85vh-92px)] space-y-3">
+          {postoModalDenuncias.denuncias.map((denuncia) => (
+            <div key={denuncia.id} className="bg-brand-dark/60 border border-white/10 rounded-2xl p-4 space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-[10px] uppercase tracking-widest text-brand-red font-black">
+                  {denuncia.bandeira || 'Sem bandeira'}
+                </span>
+                <span className="text-[10px] text-white/50 font-bold uppercase tracking-widest">
+                  {new Date(denuncia.dataDenuncia).toLocaleDateString('pt-BR')}
+                </span>
+              </div>
+              <p className="text-sm text-white/70 leading-relaxed">{denuncia.descricao}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>,
+    document.body
+  ) : null;
 
   const mapContent = isFullscreen && ehDesktop ? (
     <div
@@ -673,8 +679,18 @@ export default function Mapa({
   ) : mapaInterno;
 
   if (isFullscreen) {
-    return createPortal(mapContent, document.body);
+    return (
+      <>
+        {createPortal(mapContent, document.body)}
+        {modalDenunciasPortal}
+      </>
+    );
   }
 
-  return mapContent;
+  return (
+    <>
+      {mapContent}
+      {modalDenunciasPortal}
+    </>
+  );
 }
