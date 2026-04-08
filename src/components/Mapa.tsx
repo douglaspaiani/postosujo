@@ -463,7 +463,7 @@ export default function Mapa({
       ref={mapRef}
       className={`relative transition-all duration-500 ease-in-out ${
         isFullscreen && !ehDesktop
-          ? 'fixed inset-0 z-[100000] w-screen h-screen bg-brand-dark flex flex-col' 
+          ? 'fixed inset-0 z-[300000] w-screen h-screen bg-brand-dark flex flex-col' 
           : isFullscreen && ehDesktop
             ? 'h-full w-full bg-brand-dark flex flex-col rounded-[2rem] overflow-hidden border border-white/15 shadow-2xl'
             : 'h-[600px] bg-slate-100 w-full'
@@ -611,7 +611,7 @@ export default function Mapa({
 
       {postoModalDenuncias && (
         <div
-          className="absolute inset-0 z-[12000] bg-black/70 backdrop-blur-sm p-4 flex items-center justify-center"
+          className="absolute inset-0 z-[400000] bg-black/70 backdrop-blur-sm p-4 flex items-center justify-center"
           onClick={fecharModalOutrasDenuncias}
         >
           <div
@@ -660,7 +660,7 @@ export default function Mapa({
 
   const mapContent = isFullscreen && ehDesktop ? (
     <div
-      className="fixed inset-0 z-[100000] bg-black/75 backdrop-blur-sm p-6 lg:p-10 flex items-center justify-center"
+      className="fixed inset-0 z-[300000] bg-black/75 backdrop-blur-sm p-6 lg:p-10 flex items-center justify-center"
       onClick={toggleFullscreen}
     >
       <div
