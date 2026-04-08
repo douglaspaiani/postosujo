@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents, ZoomControl } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { PostoAgrupado } from '../types';
-import { Search, MapPin, Plus, Minus, Navigation, Maximize, Minimize, X } from 'lucide-react';
+import { Search, Plus, Minus, Navigation, Maximize, Minimize, X } from 'lucide-react';
 import { logosBandeiras } from '../lib/bandeiras';
 import { useNavigate } from 'react-router-dom';
 
@@ -82,6 +82,23 @@ interface MapaProps {
   interactive?: boolean;
   showUserLocation?: boolean;
   selectedPostoId?: string | null;
+  postoFoco?: PostoAgrupado | null;
+  forcarTelaCheia?: boolean;
+  aoAlterarTelaCheia?: (ativo: boolean) => void;
+  buscaMapa?: string;
+  carregandoSugestoes?: boolean;
+  exibirSugestoes?: boolean;
+  resultadosBusca?: ResultadoBuscaMapa[];
+  aoEnviarBuscaMapa?: () => void;
+  aoMudarBuscaMapa?: (valor: string) => void;
+  aoAlterarExibicaoSugestoes?: (ativo: boolean) => void;
+  aoSelecionarResultadoBusca?: (resultado: ResultadoBuscaMapa) => void;
+}
+
+export interface ResultadoBuscaMapa {
+  display_name: string;
+  lat: string;
+  lon: string;
 }
 
 function ChangeView({ center, zoom }: { center: [number, number], zoom: number }) {
@@ -328,11 +345,57 @@ function MarkerWithPopup({
   );
 }
 
-export default function Mapa({ postos, onMapClick, center = [-15.7801, -47.9292], zoom = 4, interactive = true, showUserLocation = false, selectedPostoId = null }: MapaProps) {
-  const [isFullscreen, setIsFullscreen] = useState(false);
+function MarkerFocoPosto({ posto }: { posto: PostoAgrupado }) {
+  const referenciaMarker = React.useRef<L.Marker>(null);
+
+  useEffect(() => {
+    if (referenciaMarker.current) {
+      referenciaMarker.current.openPopup();
+    }
+  }, [posto.idPosto]);
+
+  return (
+    <Marker position={[posto.lat, posto.lng]} icon={RedIcon} ref={referenciaMarker}>
+      <Popup>
+        <div className="min-w-[180px] space-y-2">
+          <p className="text-[10px] font-black uppercase tracking-widest text-red-700">Posto selecionado</p>
+          <h4 className="text-sm font-black text-slate-900">{posto.nome}</h4>
+          <p className="text-[11px] text-slate-600 leading-tight">{posto.endereco}</p>
+        </div>
+      </Popup>
+    </Marker>
+  );
+}
+
+export default function Mapa({
+  postos,
+  onMapClick,
+  center = [-15.7801, -47.9292],
+  zoom = 4,
+  interactive = true,
+  showUserLocation = false,
+  selectedPostoId = null,
+  postoFoco = null,
+  forcarTelaCheia = false,
+  aoAlterarTelaCheia,
+  buscaMapa = '',
+  carregandoSugestoes = false,
+  exibirSugestoes = false,
+  resultadosBusca = [],
+  aoEnviarBuscaMapa,
+  aoMudarBuscaMapa,
+  aoAlterarExibicaoSugestoes,
+  aoSelecionarResultadoBusca
+}: MapaProps) {
+  const [isFullscreen, setIsFullscreen] = useState(forcarTelaCheia);
+  const [ehDesktop, setEhDesktop] = useState(false);
+  const [buscaExpandida, setBuscaExpandida] = useState(false);
   const [postoModalDenuncias, setPostoModalDenuncias] = useState<PostoAgrupado | null>(null);
   const mapRef = React.useRef<HTMLDivElement>(null);
   const navegar = useNavigate();
+  const totalDenunciasNaRegiao = useMemo(() => {
+    return postos.reduce((acumulador, posto) => acumulador + (posto.totalDenuncias || 0), 0);
+  }, [postos]);
 
   const montarLinkDenunciaMesmoLocal = useCallback((posto: PostoAgrupado) => {
     // Mantemos os dados essenciais no query string para pré-preencher o formulário.
@@ -359,88 +422,157 @@ export default function Mapa({ postos, onMapClick, center = [-15.7801, -47.9292]
     setPostoModalDenuncias(null);
   }, []);
 
-  const toggleFullscreen = async () => {
-    if (!isFullscreen) {
-      try {
-        if (mapRef.current?.requestFullscreen) {
-          await mapRef.current.requestFullscreen();
-        } else {
-          setIsFullscreen(true);
-        }
-      } catch (err) {
-        console.error("Erro ao entrar em tela cheia:", err);
-        setIsFullscreen(true);
-      }
-    } else {
-      try {
-        if (document.fullscreenElement) {
-          await document.exitFullscreen();
-        } else {
-          setIsFullscreen(false);
-        }
-      } catch (err) {
-        console.error("Erro ao sair de tela cheia:", err);
-        setIsFullscreen(false);
-      }
-    }
+  const toggleFullscreen = () => {
+    setIsFullscreen((estadoAnterior) => !estadoAnterior);
   };
 
   useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
+    setIsFullscreen(forcarTelaCheia);
+  }, [forcarTelaCheia]);
+
+  useEffect(() => {
+    const atualizarModoDesktop = () => {
+      setEhDesktop(window.innerWidth >= 1024);
     };
 
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
-
-    return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
-      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
-      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
-    };
+    atualizarModoDesktop();
+    window.addEventListener('resize', atualizarModoDesktop);
+    return () => window.removeEventListener('resize', atualizarModoDesktop);
   }, []);
 
   useEffect(() => {
+    aoAlterarTelaCheia?.(isFullscreen);
     if (isFullscreen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
+      setBuscaExpandida(false);
+      aoAlterarExibicaoSugestoes?.(false);
     }
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [isFullscreen]);
+  }, [isFullscreen, aoAlterarTelaCheia, aoAlterarExibicaoSugestoes]);
 
   const validCenter: [number, number] = (center && !isNaN(center[0]) && !isNaN(center[1])) 
     ? center 
     : [-15.7801, -47.9292];
 
-  const mapContent = (
+  const mapaInterno = (
     <div 
       ref={mapRef}
       className={`relative transition-all duration-500 ease-in-out ${
-        isFullscreen 
+        isFullscreen && !ehDesktop
           ? 'fixed inset-0 z-[100000] w-screen h-screen bg-brand-dark flex flex-col' 
-          : 'h-[600px] bg-slate-100 w-full'
+          : isFullscreen && ehDesktop
+            ? 'h-full w-full bg-brand-dark flex flex-col rounded-[2rem] overflow-hidden border border-white/15 shadow-2xl'
+            : 'h-[600px] bg-slate-100 w-full'
       }`}
-      style={isFullscreen ? { top: 0, left: 0, right: 0, bottom: 0, position: 'fixed' } : {}}
+      style={isFullscreen && !ehDesktop ? { top: 0, left: 0, right: 0, bottom: 0, position: 'fixed' } : {}}
     >
       {isFullscreen && (
-        <div className="absolute top-6 left-6 right-6 z-[100001] flex justify-between items-center pointer-events-none">
-          <div className="glass-panel px-6 py-3 rounded-2xl flex items-center gap-3 pointer-events-auto shadow-2xl border-white/20">
-            <div className="w-2 h-2 bg-brand-red rounded-full animate-ping" />
-            <span className="text-sm font-black uppercase tracking-widest text-white italic">Radar em Tempo Real</span>
+        <div className="absolute top-4 left-4 right-4 sm:top-6 sm:left-6 sm:right-6 z-[100001] flex justify-between items-start gap-3 pointer-events-none">
+          <div className="pointer-events-auto flex items-start gap-3">
+            <div className="glass-panel px-4 py-3 sm:px-6 rounded-2xl flex items-center gap-3 shadow-2xl border-white/20">
+              <div className="w-2 h-2 bg-brand-red rounded-full animate-ping" />
+              <span className="text-xs sm:text-sm font-black uppercase tracking-widest text-white italic">Radar em Tempo Real</span>
+            </div>
+
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  const proximoEstado = !buscaExpandida;
+                  setBuscaExpandida(proximoEstado);
+                  if (!proximoEstado) aoAlterarExibicaoSugestoes?.(false);
+                }}
+                className="h-12 w-12 rounded-2xl bg-brand-red text-white shadow-2xl hover:bg-red-500 active:scale-95 transition-all flex items-center justify-center"
+                title="Buscar cidade ou posto"
+              >
+                <Search className="w-5 h-5" />
+              </button>
+
+              {buscaExpandida && (
+                <form
+                  onSubmit={(evento) => {
+                    evento.preventDefault();
+                    aoEnviarBuscaMapa?.();
+                  }}
+                  className="absolute top-0 left-14 w-[min(80vw,360px)]"
+                >
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Cidade ou posto"
+                      value={buscaMapa}
+                      onChange={(evento) => {
+                        aoMudarBuscaMapa?.(evento.target.value);
+                        aoAlterarExibicaoSugestoes?.(true);
+                      }}
+                      onFocus={() => aoAlterarExibicaoSugestoes?.(true)}
+                      onBlur={() => {
+                        setTimeout(() => aoAlterarExibicaoSugestoes?.(false), 120);
+                      }}
+                      className="w-full h-12 pl-4 pr-12 rounded-2xl bg-brand-surface/95 border border-white/20 text-white placeholder:text-white/40 outline-none focus:border-brand-red"
+                    />
+                    <button
+                      type="submit"
+                      className="absolute right-1 top-1 h-10 w-10 rounded-xl bg-brand-red text-white hover:bg-red-500 transition-colors flex items-center justify-center"
+                    >
+                      <Search className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {exibirSugestoes && buscaMapa.trim().length >= 2 && (
+                    <div className="mt-2 bg-brand-surface/95 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-xl text-left shadow-2xl">
+                      {carregandoSugestoes ? (
+                        <p className="px-4 py-3 text-xs text-white/60 font-bold uppercase tracking-wider">Buscando...</p>
+                      ) : resultadosBusca.length > 0 ? (
+                        resultadosBusca.map((resultado, indice) => (
+                          <button
+                            key={`${resultado.display_name}-${indice}`}
+                            type="button"
+                            onMouseDown={(evento) => {
+                              evento.preventDefault();
+                              aoSelecionarResultadoBusca?.(resultado);
+                              setBuscaExpandida(false);
+                            }}
+                            className="w-full px-4 py-3 border-b last:border-b-0 border-white/5 hover:bg-white/5 transition-colors"
+                          >
+                            <p className="text-sm font-bold text-white line-clamp-1">{resultado.display_name.split(',')[0]}</p>
+                            <p className="text-[11px] text-white/40 line-clamp-1">{resultado.display_name}</p>
+                          </button>
+                        ))
+                      ) : (
+                        <p className="px-4 py-3 text-xs text-white/50 font-bold uppercase tracking-wider">Nenhuma sugestão encontrada.</p>
+                      )}
+                    </div>
+                  )}
+                </form>
+              )}
+            </div>
           </div>
+
           <button 
             onClick={toggleFullscreen}
             className="p-4 bg-brand-red text-white rounded-2xl shadow-2xl hover:bg-red-500 active:scale-95 transition-all pointer-events-auto flex items-center gap-2 font-black uppercase tracking-widest text-xs"
           >
             <X className="w-5 h-5" />
-            <span>Sair da Tela Cheia</span>
+            <span className="hidden sm:inline">Sair da Tela Cheia</span>
           </button>
+        </div>
+      )}
+
+      {isFullscreen && (
+        <div className="absolute top-[4.5rem] left-4 sm:top-[5.75rem] sm:left-6 z-[100001] pointer-events-none">
+          <div className="glass-panel px-4 py-2.5 rounded-xl border border-white/15 shadow-2xl">
+            <p className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-white/70">
+              Denúncias na região
+            </p>
+            <p className="text-lg sm:text-xl font-black text-brand-red leading-none mt-1">
+              {totalDenunciasNaRegiao}
+            </p>
+          </div>
         </div>
       )}
 
@@ -462,6 +594,7 @@ export default function Mapa({ postos, onMapClick, center = [-15.7801, -47.9292]
         <InitialLocation center={validCenter} />
         {interactive && <MapEvents onClick={onMapClick} />}
         {showUserLocation && <LocationMarker />}
+        {postoFoco && <MarkerFocoPosto posto={postoFoco} />}
         
         <CustomControls isFullscreen={isFullscreen} toggleFullscreen={toggleFullscreen} />
         
@@ -524,6 +657,20 @@ export default function Mapa({ postos, onMapClick, center = [-15.7801, -47.9292]
       )}
     </div>
   );
+
+  const mapContent = isFullscreen && ehDesktop ? (
+    <div
+      className="fixed inset-0 z-[100000] bg-black/75 backdrop-blur-sm p-6 lg:p-10 flex items-center justify-center"
+      onClick={toggleFullscreen}
+    >
+      <div
+        className="w-full h-full max-w-[1400px] max-h-[92vh]"
+        onClick={(evento) => evento.stopPropagation()}
+      >
+        {mapaInterno}
+      </div>
+    </div>
+  ) : mapaInterno;
 
   if (isFullscreen) {
     return createPortal(mapContent, document.body);

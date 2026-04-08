@@ -1,34 +1,22 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Search, MapPin, Navigation, Radar, X, AlertCircle } from 'lucide-react';
-import Mapa from '../components/Mapa';
+import Mapa, { ResultadoBuscaMapa } from '../components/Mapa';
 import { PostoAgrupado } from '../types';
 import { calculateDistance } from '../lib/geo';
 import { listarPostosAgrupados } from '../lib/apiDenuncias';
 import { logosBandeiras } from '../lib/bandeiras';
 import logoOutros from '../assets/bandeiras/outro.png';
 
-interface ResultadoBusca {
-  display_name: string;
-  lat: string;
-  lon: string;
-  address: {
-    city?: string;
-    town?: string;
-    village?: string;
-    state?: string;
-  };
-}
-
 const RAIO_CIDADES_VIZINHAS_KM = 50;
 const ITENS_POR_PAGINA_DENUNCIAS = 9;
 
 export default function Inicio() {
-  const secaoMapaRef = useRef<HTMLElement>(null);
   const [busca, setBusca] = useState('');
-  const [resultadosBusca, setResultadosBusca] = useState<ResultadoBusca[]>([]);
+  const [resultadosBusca, setResultadosBusca] = useState<ResultadoBuscaMapa[]>([]);
   const [carregandoSugestoes, setCarregandoSugestoes] = useState(false);
   const [exibirSugestoes, setExibirSugestoes] = useState(false);
+  const [forcarMapaTelaCheia, setForcarMapaTelaCheia] = useState(false);
   const [filtroCidadeVizinha, setFiltroCidadeVizinha] = useState<[number, number] | null>(null);
   const [postos, setPostos] = useState<PostoAgrupado[]>([]);
   const [carregandoPostos, setCarregandoPostos] = useState(true);
@@ -37,6 +25,7 @@ export default function Inicio() {
   const [zoomMapa, setZoomMapa] = useState(4);
   const [localUsuario, setLocalUsuario] = useState<[number, number] | null>(null);
   const [postoSelecionadoId, setPostoSelecionadoId] = useState<string | null>(null);
+  const [postoFocoMapa, setPostoFocoMapa] = useState<PostoAgrupado | null>(null);
   const [postoModal, setPostoModal] = useState<PostoAgrupado | null>(null);
   const [paginaAtual, setPaginaAtual] = useState(1);
 
@@ -86,7 +75,7 @@ export default function Inicio() {
           { signal: controlador.signal }
         );
         const dados = await resposta.json();
-        let resultados: ResultadoBusca[] = Array.isArray(dados) ? dados : [];
+        let resultados: ResultadoBuscaMapa[] = Array.isArray(dados) ? dados : [];
 
         if (resultados.length === 0 && !busca.toLowerCase().includes('posto')) {
           const consultaPosto = `posto ${busca} Brasil`;
@@ -114,7 +103,7 @@ export default function Inicio() {
     };
   }, [busca]);
 
-  const aplicarResultadoBusca = (resultado: ResultadoBusca) => {
+  const aplicarResultadoBusca = (resultado: ResultadoBuscaMapa) => {
     const latitude = parseFloat(resultado.lat);
     const longitude = parseFloat(resultado.lon);
 
@@ -132,8 +121,7 @@ export default function Inicio() {
     setExibirSugestoes(false);
   };
 
-  const handleBusca = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleBusca = async () => {
     if (!busca) return;
 
     const primeiroResultado = resultadosBusca[0];
@@ -146,7 +134,7 @@ export default function Inicio() {
       const resposta = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(`${busca}, Brasil`)}`);
       const dados = await resposta.json();
       if (dados && dados.length > 0) {
-        aplicarResultadoBusca(dados[0] as ResultadoBusca);
+        aplicarResultadoBusca(dados[0] as ResultadoBuscaMapa);
       } else {
         setExibirSugestoes(false);
       }
@@ -226,7 +214,8 @@ export default function Inicio() {
     setCentroMapa([posto.lat, posto.lng]);
     setZoomMapa(16);
     setPostoSelecionadoId(posto.idPosto);
-    secaoMapaRef.current?.scrollIntoView({ behavior: 'smooth' });
+    setPostoFocoMapa(posto);
+    setForcarMapaTelaCheia(true);
   };
 
   const obterLogoBandeira = (bandeira?: string) => {
@@ -235,6 +224,25 @@ export default function Inicio() {
       return logoOutros;
     }
     return logosBandeiras[bandeiraNormalizada as keyof typeof logosBandeiras] || null;
+  };
+
+  const abrirMapaTelaCheia = () => {
+    setPostoSelecionadoId(null);
+    setPostoFocoMapa(null);
+    // Requisita a localização no clique para priorizar o ponto atual ao abrir o mapa.
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition((posicao) => {
+        const { latitude, longitude } = posicao.coords;
+        setLocalUsuario([latitude, longitude]);
+        setCentroMapa([latitude, longitude]);
+        setZoomMapa(16);
+        setForcarMapaTelaCheia(true);
+      }, () => {
+        setForcarMapaTelaCheia(true);
+      });
+      return;
+    }
+    setForcarMapaTelaCheia(true);
   };
 
   return (
@@ -276,64 +284,15 @@ export default function Inicio() {
           A maior rede colaborativa de combate à fraude de combustíveis no Brasil, incluindo dados oficiais da ANP. Você está sendo prejudicado, não se cale e divulge!
         </motion.p>
 
-          <motion.form
+          <motion.button
             variants={itemVariants}
-            onSubmit={handleBusca}
-            className="w-full max-w-xl absolute left-1/2 -translate-x-1/2 -bottom-14 sm:-bottom-16 group px-2 z-[20000]"
+            type="button"
+            onClick={abrirMapaTelaCheia}
+            className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-brand-red text-white font-black uppercase tracking-widest text-sm shadow-2xl shadow-brand-red/25 hover:bg-red-500 active:scale-95 transition-all"
           >
-            <div className="relative flex flex-col sm:block">
-              <div className="absolute inset-0 bg-brand-red/20 blur-2xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Cidade ou Posto..."
-                  className="w-full pl-6 pr-16 py-5 bg-white/10 border-2 border-white/10 rounded-2xl focus:border-brand-red focus:bg-white/15 outline-none transition-all text-white text-lg font-bold placeholder:text-white/30 backdrop-blur-md"
-                  value={busca}
-                  onChange={(e) => {
-                    setBusca(e.target.value);
-                    setFiltroCidadeVizinha(null);
-                    setExibirSugestoes(true);
-                  }}
-                  onFocus={() => setExibirSugestoes(true)}
-                  onBlur={() => {
-                    // Pequeno delay para permitir o clique no item da lista.
-                    setTimeout(() => setExibirSugestoes(false), 120);
-                  }}
-                />
-                <button
-                  type="submit"
-                  className="absolute right-2 top-2 bottom-2 px-4 bg-brand-red text-white rounded-xl hover:bg-red-500 active:scale-95 transition-all shadow-lg shadow-brand-red/20"
-                >
-                  <Search className="w-5 h-5" />
-                </button>
-              </div>
-
-              {exibirSugestoes && (busca.trim().length >= 2) && (
-                <div className="absolute left-0 right-0 top-[calc(100%+8px)] bg-brand-surface/95 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-xl text-left z-[20001] shadow-2xl">
-                  {carregandoSugestoes ? (
-                    <p className="px-4 py-3 text-xs text-white/60 font-bold uppercase tracking-wider">Buscando cidades e postos...</p>
-                  ) : resultadosBusca.length > 0 ? (
-                    resultadosBusca.map((resultado, indice) => (
-                      <button
-                        key={`${resultado.display_name}-${indice}`}
-                        type="button"
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          aplicarResultadoBusca(resultado);
-                        }}
-                        className="w-full px-4 py-3 border-b last:border-b-0 border-white/5 hover:bg-white/5 transition-colors"
-                      >
-                        <p className="text-sm font-bold text-white line-clamp-1">{resultado.display_name.split(',')[0]}</p>
-                        <p className="text-[11px] text-white/40 line-clamp-1">{resultado.display_name}</p>
-                      </button>
-                    ))
-                  ) : (
-                    <p className="px-4 py-3 text-xs text-white/50 font-bold uppercase tracking-wider">Nenhuma sugestão encontrada.</p>
-                  )}
-                </div>
-              )}
-            </div>
-          </motion.form>
+            <Navigation className="w-5 h-5" />
+            Abrir mapa
+          </motion.button>
         </motion.div>
 
         <motion.div
@@ -344,27 +303,6 @@ export default function Inicio() {
         >
           <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30">Explorar Mapa</span>
         </motion.div>
-      </section>
-
-      <section ref={secaoMapaRef} className="relative scroll-mt-20 mt-8 sm:mt-10 overflow-visible">
-        <div className="relative z-0">
-          <Mapa
-            postos={postosFiltrados}
-            center={centroMapa}
-            zoom={zoomMapa}
-            showUserLocation={true}
-            selectedPostoId={postoSelecionadoId}
-          />
-        </div>
-
-        <div className="absolute top-4 sm:top-8 left-4 sm:left-8 z-[400] pointer-events-none">
-          <div className="glass-panel p-4 sm:p-6 rounded-2xl sm:rounded-3xl space-y-1 max-w-[180px] sm:max-w-xs">
-            <h2 className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-brand-red">Radar Ativo</h2>
-            <p className="text-lg sm:text-xl font-bold text-white leading-none">
-              {postosFiltrados.length} <span className="text-white/40 text-[10px] sm:text-sm font-medium block sm:inline">Postos Suspeitos</span>
-            </p>
-          </div>
-        </div>
       </section>
 
       <section className="pt-4 pb-24 px-4 bg-brand-dark relative z-[500] mt-8 sm:mt-10">
@@ -582,6 +520,30 @@ export default function Inicio() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {forcarMapaTelaCheia && (
+        <Mapa
+          postos={postosFiltrados}
+          center={centroMapa}
+          zoom={zoomMapa}
+          showUserLocation={true}
+          selectedPostoId={postoSelecionadoId}
+          postoFoco={postoFocoMapa}
+          forcarTelaCheia={forcarMapaTelaCheia}
+          aoAlterarTelaCheia={setForcarMapaTelaCheia}
+          buscaMapa={busca}
+          carregandoSugestoes={carregandoSugestoes}
+          exibirSugestoes={exibirSugestoes}
+          resultadosBusca={resultadosBusca}
+          aoEnviarBuscaMapa={handleBusca}
+          aoMudarBuscaMapa={(valor) => {
+            setBusca(valor);
+            setFiltroCidadeVizinha(null);
+          }}
+          aoAlterarExibicaoSugestoes={setExibirSugestoes}
+          aoSelecionarResultadoBusca={aplicarResultadoBusca}
+        />
+      )}
     </div>
   );
 }
