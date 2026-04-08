@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Search, MapPin, Navigation, Radar, X, AlertCircle } from 'lucide-react';
 import Mapa, { ResultadoBuscaMapa } from '../components/Mapa';
@@ -12,6 +12,7 @@ const RAIO_CIDADES_VIZINHAS_KM = 50;
 const ITENS_POR_PAGINA_DENUNCIAS = 9;
 
 export default function Inicio() {
+  const secaoListaRef = useRef<HTMLElement>(null);
   const [busca, setBusca] = useState('');
   const [resultadosBusca, setResultadosBusca] = useState<ResultadoBuscaMapa[]>([]);
   const [carregandoSugestoes, setCarregandoSugestoes] = useState(false);
@@ -245,6 +246,10 @@ export default function Inicio() {
     setForcarMapaTelaCheia(true);
   };
 
+  const rolarParaTopoDaLista = () => {
+    secaoListaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   return (
     <div className="flex flex-col h-full bg-brand-dark">
       <section className="relative z-[700] min-h-[60vh] flex items-center justify-center px-4 pt-12">
@@ -305,7 +310,7 @@ export default function Inicio() {
         </motion.div>
       </section>
 
-      <section className="pt-4 pb-24 px-4 bg-brand-dark relative z-[500] mt-8 sm:mt-10">
+      <section ref={secaoListaRef} className="pt-4 pb-24 px-4 bg-brand-dark relative z-[500] mt-8 sm:mt-10">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-24">
             <div className="space-y-4">
@@ -442,7 +447,13 @@ export default function Inicio() {
                 <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6">
                   <button
                     type="button"
-                    onClick={() => setPaginaAtual((anterior) => Math.max(1, anterior - 1))}
+                    onClick={() => {
+                      setPaginaAtual((anterior) => {
+                        const proximaPagina = Math.max(1, anterior - 1);
+                        if (proximaPagina !== anterior) rolarParaTopoDaLista();
+                        return proximaPagina;
+                      });
+                    }}
                     disabled={paginaAtual === 1}
                     className="px-4 py-2 rounded-xl border border-white/10 bg-white/5 text-xs font-black uppercase tracking-widest text-white/70 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                   >
@@ -455,7 +466,13 @@ export default function Inicio() {
 
                   <button
                     type="button"
-                    onClick={() => setPaginaAtual((anterior) => Math.min(totalPaginas, anterior + 1))}
+                    onClick={() => {
+                      setPaginaAtual((anterior) => {
+                        const proximaPagina = Math.min(totalPaginas, anterior + 1);
+                        if (proximaPagina !== anterior) rolarParaTopoDaLista();
+                        return proximaPagina;
+                      });
+                    }}
                     disabled={paginaAtual === totalPaginas}
                     className="px-4 py-2 rounded-xl border border-brand-red/40 bg-brand-red/10 text-xs font-black uppercase tracking-widest text-brand-red hover:bg-brand-red hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                   >
