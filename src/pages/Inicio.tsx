@@ -7,6 +7,7 @@ import { calculateDistance } from '../lib/geo';
 import { listarPostosAgrupados } from '../lib/apiDenuncias';
 import { logosBandeiras } from '../lib/bandeiras';
 import logoOutros from '../assets/bandeiras/outro.png';
+import SeoPagina from '../components/SeoPagina';
 
 const RAIO_CIDADES_VIZINHAS_KM = 50;
 const ITENS_POR_PAGINA_DENUNCIAS = 9;
@@ -251,7 +252,14 @@ export default function Inicio() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-brand-dark">
+    <>
+      <SeoPagina
+        titulo="PostoSujo | Mapa de postos com denúncias de combustível adulterado"
+        descricao="Consulte denúncias de combustível adulterado no mapa colaborativo, filtre por cidade e contribua com informações para proteger outros motoristas."
+        caminho="/"
+        palavrasChave="postos com gasolina adulterada, denúncia de posto, combustível adulterado, mapa de denúncias"
+      />
+      <div className="flex flex-col h-full bg-brand-dark">
       <section className="relative z-[700] min-h-[60vh] flex items-center justify-center px-4 pt-12">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_38%,rgba(255,30,30,0.24)_0%,rgba(120,0,0,0.18)_28%,rgba(15,0,0,0.92)_62%,#050505_100%)]" />
@@ -563,6 +571,7 @@ export default function Inicio() {
           aoSelecionarResultadoBusca={aplicarResultadoBusca}
         />
       )}
-    </div>
+      </div>
+    </>
   );
 }

@@ -6,6 +6,7 @@ import { BandeiraPosto } from '../types';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { criarDenuncia } from '../lib/apiDenuncias';
 import { logosBandeiras } from '../lib/bandeiras';
+import SeoPagina from '../components/SeoPagina';
 
 interface SearchResult {
   display_name: string;
@@ -173,28 +174,43 @@ export default function Denunciar() {
 
   if (success) {
     return (
-      <div className="flex-1 flex items-center justify-center p-4 bg-brand-dark">
-        <motion.div 
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="glass-panel p-12 rounded-[3rem] text-center max-w-md w-full shadow-2xl shadow-brand-red/10"
-        >
-          <div className="bg-brand-red/20 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-8 border border-brand-red/30">
-            <CheckCircle2 className="text-brand-red w-12 h-12" />
-          </div>
-          <h2 className="text-3xl font-black text-white mb-4 uppercase italic tracking-tight">Denúncia Enviada!</h2>
-          <p className="text-white/60 mb-8 font-medium">Obrigado por ajudar a manter nossa comunidade informada e protegida.</p>
-          <div className="flex items-center justify-center gap-3 text-brand-red">
-            <Loader2 className="w-5 h-5 animate-spin" />
-            <span className="text-xs font-black uppercase tracking-widest">Voltando ao Radar...</span>
-          </div>
-        </motion.div>
-      </div>
+      <>
+        <SeoPagina
+          titulo="Denunciar Posto | PostoSujo"
+          descricao="Registre uma denúncia de posto com combustível adulterado de forma rápida e colaborativa para fortalecer a segurança de outros motoristas."
+          caminho="/denunciar"
+          palavrasChave="denunciar posto, combustível adulterado, gasolina batizada, denúncia colaborativa"
+        />
+        <div className="flex-1 flex items-center justify-center p-4 bg-brand-dark">
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="glass-panel p-12 rounded-[3rem] text-center max-w-md w-full shadow-2xl shadow-brand-red/10"
+          >
+            <div className="bg-brand-red/20 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-8 border border-brand-red/30">
+              <CheckCircle2 className="text-brand-red w-12 h-12" />
+            </div>
+            <h2 className="text-3xl font-black text-white mb-4 uppercase italic tracking-tight">Denúncia Enviada!</h2>
+            <p className="text-white/60 mb-8 font-medium">Obrigado por ajudar a manter nossa comunidade informada e protegida.</p>
+            <div className="flex items-center justify-center gap-3 text-brand-red">
+              <Loader2 className="w-5 h-5 animate-spin" />
+              <span className="text-xs font-black uppercase tracking-widest">Voltando ao Radar...</span>
+            </div>
+          </motion.div>
+        </div>
+      </>
     );
   }
 
   return (
-    <div className="flex-1 bg-brand-dark py-12 sm:py-24 px-4 relative overflow-hidden">
+    <>
+      <SeoPagina
+        titulo="Denunciar Posto | PostoSujo"
+        descricao="Registre uma denúncia de posto com combustível adulterado de forma rápida e colaborativa para fortalecer a segurança de outros motoristas."
+        caminho="/denunciar"
+        palavrasChave="denunciar posto, combustível adulterado, gasolina batizada, denúncia colaborativa"
+      />
+      <div className="flex-1 bg-brand-dark py-12 sm:py-24 px-4 relative overflow-hidden">
       {/* Background Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100%] h-[100%] bg-[radial-gradient(circle_at_center,rgba(255,30,30,0.05)_0%,transparent_70%)] pointer-events-none" />
 
@@ -650,6 +666,7 @@ export default function Denunciar() {
           </button>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }

@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { ShieldCheck, Users, Map, Fuel, AlertTriangle, ChevronRight, Radar } from 'lucide-react';
+import SeoPagina from '../components/SeoPagina';
 
 export default function Sobre() {
   const features = [
@@ -37,7 +38,14 @@ export default function Sobre() {
   };
 
   return (
-    <div className="flex-1 bg-brand-dark overflow-hidden font-sans">
+    <>
+      <SeoPagina
+        titulo="Sobre o PostoSujo | Transparência no combustível"
+        descricao="Conheça a missão do PostoSujo e aprenda como identificar sinais de combustível adulterado para abastecer com mais segurança."
+        caminho="/sobre"
+        palavrasChave="sobre postosujo, combustível adulterado, segurança no abastecimento, sinais de adulteração"
+      />
+      <div className="flex-1 bg-brand-dark overflow-hidden font-sans">
       {/* Hero Section */}
       <section className="relative min-h-[60vh] flex items-center justify-center px-4 overflow-hidden border-b border-white/5 pt-12">
         {/* Background Elements */}
@@ -169,6 +177,7 @@ export default function Sobre() {
           </motion.div>
         </div>
       </section>
-    </div>
+      </div>
+    </>
   );
 }
