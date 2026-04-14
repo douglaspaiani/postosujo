@@ -7,6 +7,11 @@ export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
   return {
     plugins: [react(), tailwindcss()],
+    build: {
+      // Mantém assets de builds anteriores para evitar quebra de CSS/JS
+      // em usuários com HTML em cache logo após deploy.
+      emptyOutDir: false,
+    },
     define: {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
     },
