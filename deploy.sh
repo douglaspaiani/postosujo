@@ -37,6 +37,17 @@ instalar_dependencias_build() {
   npm install --include=dev
 }
 
+detectar_diretivas_tailwind_nao_processadas() {
+  local caminho_arquivo="$1"
+
+  if command -v rg >/dev/null 2>&1; then
+    rg -q "@apply|@tailwind" "$caminho_arquivo"
+    return $?
+  fi
+
+  grep -Eq "@apply|@tailwind" "$caminho_arquivo"
+}
+
 validar_build_css() {
   local diretorio_assets="dist/assets"
   local arquivo_css=""
@@ -52,7 +63,7 @@ validar_build_css() {
     encontrou_css=1
 
     # Evita deploy com diretivas Tailwind não processadas, que quebram layout em produção.
-    if rg -q "@apply|@tailwind" "$arquivo_css"; then
+    if detectar_diretivas_tailwind_nao_processadas "$arquivo_css"; then
       echo "ERRO: CSS final contém diretivas Tailwind não processadas (@apply/@tailwind)."
       echo "Arquivo com problema: $arquivo_css"
       echo "Interrompendo deploy para evitar publicação com CSS quebrado."
