@@ -25,6 +25,18 @@ validar_arquivos_essenciais() {
   fi
 }
 
+instalar_dependencias_build() {
+  if [[ -f "package-lock.json" ]]; then
+    # Garante versão idêntica das dependências entre ambientes, inclusive devDeps
+    # usadas durante a compilação de CSS (Tailwind/Vite).
+    npm ci --include=dev
+    return
+  fi
+
+  echo "Aviso: package-lock.json não encontrado. Usando npm install --include=dev."
+  npm install --include=dev
+}
+
 validar_build_css() {
   local arquivo_css="dist/assets/app.css"
 
@@ -41,19 +53,22 @@ validar_build_css() {
   fi
 }
 
-echo "[1/3] Atualizando código com git pull..."
+echo "[1/4] Atualizando código com git pull..."
 git pull
 
-echo "[1.5/3] Validando estrutura do projeto..."
+echo "[1.5/4] Validando estrutura do projeto..."
 validar_arquivos_essenciais
 
-echo "[2/3] Gerando build com npm run build..."
+echo "[2/4] Instalando dependências de build..."
+instalar_dependencias_build
+
+echo "[3/4] Gerando build com npm run build..."
 npm run build
 
-echo "[2.5/3] Validando CSS final do build..."
+echo "[3.5/4] Validando CSS final do build..."
 validar_build_css
 
-echo "[3/3] Reiniciando processo no PM2..."
+echo "[4/4] Reiniciando processo no PM2..."
 pm2 restart postosujo 
 
 echo "Deploy finalizado com sucesso."
