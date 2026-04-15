@@ -4,21 +4,36 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-  
-  --color-brand-red: #FF1E1E;
+
+  --color-brand-red: #ff1e1e;
   --color-brand-dark: #050505;
   --color-brand-surface: #121212;
   --color-brand-border: rgba(255, 255, 255, 0.1);
-  
+
   --animate-spin-slow: spin 3s linear infinite;
 }
 
 @layer base {
-  html, body, #root {
+  html,
+  body,
+  #root {
     height: 100%;
     margin: 0;
     padding: 0;
-    @apply bg-brand-dark text-white antialiased selection:bg-brand-red selection:text-white;
+    background-color: var(--color-brand-dark);
+    color: #fff;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html ::selection,
+  body ::selection,
+  #root ::selection,
+  html::selection,
+  body::selection,
+  #root::selection {
+    background-color: var(--color-brand-red);
+    color: #fff;
   }
 
   /* Bloqueia seleção de texto na aplicação inteira */
@@ -55,25 +70,29 @@
 
 @layer components {
   .glass-panel {
-    @apply bg-white/5 backdrop-blur-xl border border-white/10;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
-  
+
   .red-glow {
-    @apply shadow-[0_0_20px_rgba(255,30,30,0.3)];
+    box-shadow: 0 0 20px rgba(255, 30, 30, 0.3);
   }
-  
+
   .red-glow-hover:hover {
-    @apply shadow-[0_0_30px_rgba(255,30,30,0.5)];
+    box-shadow: 0 0 30px rgba(255, 30, 30, 0.5);
   }
 
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-  
+
   .leaflet-container {
     width: 100%;
     height: 100%;
@@ -91,6 +110,7 @@
   border: none !important;
 }
 
-button, a {
+button,
+a {
   cursor: pointer;
 }
