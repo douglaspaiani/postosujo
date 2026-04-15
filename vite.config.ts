@@ -1,4 +1,3 @@
-import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import {defineConfig, loadEnv} from 'vite';
@@ -6,7 +5,7 @@ import {defineConfig, loadEnv} from 'vite';
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
   return {
-    plugins: [react(), tailwindcss()],
+    plugins: [react()],
     build: {
       // Mantém nomes estáveis de CSS/JS para evitar páginas sem estilo
       // quando existe desencontro entre HTML em cache e arquivos hashados.
