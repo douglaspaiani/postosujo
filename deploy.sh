@@ -25,6 +25,22 @@ validar_arquivos_essenciais() {
   fi
 }
 
+validar_build_css() {
+  local arquivo_css="dist/assets/app.css"
+
+  if [[ ! -f "$arquivo_css" ]]; then
+    echo "ERRO: arquivo CSS final não encontrado em $arquivo_css"
+    exit 1
+  fi
+
+  # Evita deploy com diretivas Tailwind não processadas, que quebram layout em produção.
+  if rg -q "@apply|@tailwind" "$arquivo_css"; then
+    echo "ERRO: CSS final contém diretivas Tailwind não processadas (@apply/@tailwind)."
+    echo "Interrompendo deploy para evitar publicação com CSS quebrado."
+    exit 1
+  fi
+}
+
 echo "[1/3] Atualizando código com git pull..."
 git pull
 
@@ -33,6 +49,9 @@ validar_arquivos_essenciais
 
 echo "[2/3] Gerando build com npm run build..."
 npm run build
+
+echo "[2.5/3] Validando CSS final do build..."
+validar_build_css
 
 echo "[3/3] Reiniciando processo no PM2..."
 pm2 restart postosujo 
