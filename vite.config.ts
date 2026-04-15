@@ -8,9 +8,23 @@ export default defineConfig(({mode}) => {
   return {
     plugins: [react(), tailwindcss()],
     build: {
-      // Mantém assets de builds anteriores para evitar quebra de CSS/JS
-      // em usuários com HTML em cache logo após deploy.
-      emptyOutDir: false,
+      // Mantém nomes estáveis de CSS/JS para evitar páginas sem estilo
+      // quando existe desencontro entre HTML em cache e arquivos hashados.
+      rollupOptions: {
+        output: {
+          entryFileNames: 'assets/app.js',
+          chunkFileNames: 'assets/chunks/[name].js',
+          assetFileNames: (assetInfo) => {
+            const nomeArquivo = assetInfo.name ?? '';
+
+            if (nomeArquivo.endsWith('.css')) {
+              return 'assets/app.css';
+            }
+
+            return 'assets/[name]-[hash][extname]';
+          },
+        },
+      },
     },
     define: {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
