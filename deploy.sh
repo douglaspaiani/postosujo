@@ -38,19 +38,42 @@ instalar_dependencias_build() {
 }
 
 validar_build_css() {
-  local arquivo_css="dist/assets/app.css"
+  local diretorio_assets="dist/assets"
+  local arquivo_css=""
+  local encontrou_css=0
 
-  if [[ ! -f "$arquivo_css" ]]; then
-    echo "ERRO: arquivo CSS final não encontrado em $arquivo_css"
+  if [[ ! -d "$diretorio_assets" ]]; then
+    echo "ERRO: diretório de assets não encontrado em $diretorio_assets"
     exit 1
   fi
 
-  # Evita deploy com diretivas Tailwind não processadas, que quebram layout em produção.
-  if rg -q "@apply|@tailwind" "$arquivo_css"; then
-    echo "ERRO: CSS final contém diretivas Tailwind não processadas (@apply/@tailwind)."
-    echo "Interrompendo deploy para evitar publicação com CSS quebrado."
+  while IFS= read -r arquivo_css; do
+    [[ -z "$arquivo_css" ]] && continue
+    encontrou_css=1
+
+    # Evita deploy com diretivas Tailwind não processadas, que quebram layout em produção.
+    if rg -q "@apply|@tailwind" "$arquivo_css"; then
+      echo "ERRO: CSS final contém diretivas Tailwind não processadas (@apply/@tailwind)."
+      echo "Arquivo com problema: $arquivo_css"
+      echo "Interrompendo deploy para evitar publicação com CSS quebrado."
+      exit 1
+    fi
+  done < <(find "$diretorio_assets" -maxdepth 1 -type f -name '*.css' | sort)
+
+  if [[ "$encontrou_css" -eq 0 ]]; then
+    echo "ERRO: nenhum arquivo CSS encontrado em $diretorio_assets"
     exit 1
   fi
+}
+
+reiniciar_servico_frontend() {
+  if command -v pm2 >/dev/null 2>&1; then
+    pm2 restart postosujo
+    return
+  fi
+
+  echo "Aviso: PM2 não encontrado neste ambiente."
+  echo "Build concluído. Reinicie o serviço de frontend manualmente para publicar a nova versão."
 }
 
 echo "[1/4] Atualizando código com git pull..."
@@ -69,6 +92,6 @@ echo "[3.5/4] Validando CSS final do build..."
 validar_build_css
 
 echo "[4/4] Reiniciando processo no PM2..."
-pm2 restart postosujo 
+reiniciar_servico_frontend
 
 echo "Deploy finalizado com sucesso."
